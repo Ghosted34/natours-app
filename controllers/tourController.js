@@ -1,13 +1,68 @@
 const fs = require('fs');
 const Tour = require('./../models/tourModel');
 
-// const tours = JSON.parse(
-//   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
-// );
+exports.aliasTopTours = async (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+
+  next();
+};
 
 exports.getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    // Build query
+
+    // 1. Basic Filtering
+    const queryObj = { ...req.query };
+    const excludedObj = ['page', 'sort', 'limit', 'fields'];
+    excludedObj.forEach((el) => delete queryObj[el]);
+
+    // 2. Advanced Filtering
+
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(
+      /\b(gte|gt|lte|lt)\b/g,
+      (matched) => `$${matched}`
+    );
+
+    let query = Tour.find(JSON.parse(queryStr));
+
+    // 3. Sorting
+
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(',').join(' ');
+      query = query.sort(sortBy);
+    } else {
+      query = query.sort('-price');
+    }
+
+    // 4. Fields
+    if (req.query.fields) {
+      const selectBy = req.query.fields.split(',').join(' ');
+      query = query.select(selectBy);
+    } else {
+      query = query.select('-__v');
+    }
+
+    // 5. Pagination(using pages and limits)
+    const page = req.query.page * 1 || 1;
+    const limitValue = req.query.limit * 1 || 3;
+
+    const skipValue = (page - 1) * limitValue;
+
+    query = query.skip(skipValue).limit(limitValue);
+
+    if (req.query.page) {
+      const numTours = await Tour.countDocuments();
+      if (skipValue >= numTours) throw new Error('This page does not exist');
+    }
+
+    // Execute query
+
+    const tours = await query;
+
+    // const tours = await Tour.find();
 
     res.json({
       status: 'success',
