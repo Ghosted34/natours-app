@@ -6,6 +6,14 @@ const router = express.Router();
 router
   .route('/top-5-cheap')
   .get(tourController.aliasTopTours, tourController.getAllTours);
+
+router
+  .route('/all-premium')
+  .get(tourController.aliasAllPremium, tourController.getAllTours);
+
+router.route('/tour-stats').get(tourController.getTourStats);
+router.route('/tour-year-stats').get(tourController.yearlyTourStats);
+
 router
   .route('/')
   .get(tourController.getAllTours)

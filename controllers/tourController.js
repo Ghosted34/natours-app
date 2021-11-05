@@ -1,68 +1,31 @@
 const fs = require('fs');
 const Tour = require('./../models/tourModel');
+const APIFeatures = require('./../utils/apiFeatures');
 
-exports.aliasTopTours = async (req, res, next) => {
+exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
   req.query.sort = '-ratingsAverage,price';
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
+
+exports.aliasAllPremium = async (req, res, next) => {
+  req.query.premium = true;
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty,premium';
 
   next();
 };
 
 exports.getAllTours = async (req, res) => {
   try {
-    // Build query
-
-    // 1. Basic Filtering
-    const queryObj = { ...req.query };
-    const excludedObj = ['page', 'sort', 'limit', 'fields'];
-    excludedObj.forEach((el) => delete queryObj[el]);
-
-    // 2. Advanced Filtering
-
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(
-      /\b(gte|gt|lte|lt)\b/g,
-      (matched) => `$${matched}`
-    );
-
-    let query = Tour.find(JSON.parse(queryStr));
-
-    // 3. Sorting
-
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort('-price');
-    }
-
-    // 4. Fields
-    if (req.query.fields) {
-      const selectBy = req.query.fields.split(',').join(' ');
-      query = query.select(selectBy);
-    } else {
-      query = query.select('-__v');
-    }
-
-    // 5. Pagination(using pages and limits)
-    const page = req.query.page * 1 || 1;
-    const limitValue = req.query.limit * 1 || 3;
-
-    const skipValue = (page - 1) * limitValue;
-
-    query = query.skip(skipValue).limit(limitValue);
-
-    if (req.query.page) {
-      const numTours = await Tour.countDocuments();
-      if (skipValue >= numTours) throw new Error('This page does not exist');
-    }
-
     // Execute query
-
-    const tours = await query;
-
-    // const tours = await Tour.find();
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await features.query;
 
     res.json({
       status: 'success',
@@ -136,6 +99,84 @@ exports.deleteTour = async (req, res) => {
     res.status(204).json({
       status: 'success',
       data: null,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: fail,
+      message: err,
+    });
+  }
+};
+
+exports.getTourStats = async (req, res) => {
+  try {
+    const stats = await Tour.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } },
+      },
+      {
+        $group: {
+          _id: null,
+          numRatings: { $sum: 'ratingsQuantity' },
+          numTours: { $sum: 1 },
+          avgRating: { $avg: '$ratingsAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+        },
+      },
+    ]);
+
+    res.status(204).json({
+      status: 'success',
+      data: { stats },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: fail,
+      message: err,
+    });
+  }
+};
+
+exports.yearlyTourStats = async (req, res) => {
+  try {
+    const year = req.params.year * 1;
+
+    const plans = await Tour.aggregate([
+      {
+        $unwind: '$startDates',
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: 'startDates' },
+          numTours: { $sum: 1 },
+          tours: { $push: '$name' },
+        },
+      },
+      {
+        $addFields: { $month: '$_id' },
+      },
+      {
+        $project: { _id: 0 },
+      },
+      {
+        $sort: { $numTours: -1 },
+      },
+    ]);
+
+    res.status(204).json({
+      status: 'success',
+      tourNumber: plan.length,
+      data: { plans },
     });
   } catch (err) {
     res.status(400).json({
