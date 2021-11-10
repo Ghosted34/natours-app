@@ -56,6 +56,7 @@ const tourSchema = new mongoose.Schema(
       select: false,
     },
     startDates: [Date],
+    slug: String,
   },
   {
     toJSON: { virtuals: true },
@@ -68,8 +69,9 @@ tourSchema.virtual('durationWeeks').get(function () {
 });
 
 // DOCUMENT MIDDLEWARE: runs before mongoode event[.save, .create,!.insertMany]
-tourSchema.pre('save', function () {
+tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
+  next();
 });
 
 const Tour = mongoose.model('Tour', tourSchema);

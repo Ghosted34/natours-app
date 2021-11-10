@@ -17,6 +17,15 @@
     "slugify": "^1.6.1"
   },
   "devDependencies": {
-    "ndb": "^1.1.5"
-  }
+    "ndb": "^1.1.5",
+    "nodemon": "^2.0.14"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ghosted34/natours-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ghosted34/natours-app/issues"
+  },
+  "homepage": "https://github.com/Ghosted34/natours-app#readme"
 }

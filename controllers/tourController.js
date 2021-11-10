@@ -5,14 +5,15 @@ const APIFeatures = require('./../utils/apiFeatures');
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
   req.query.sort = '-ratingsAverage,price';
-  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty,duration';
   next();
 };
 
 exports.aliasAllPremium = async (req, res, next) => {
   req.query.premium = true;
   req.query.sort = '-ratingsAverage,price';
-  req.query.fields = 'name,price,ratingsAverage,summary,difficulty,premium';
+  req.query.fields =
+    'name,price,ratingsAverage,summary,difficulty,premium,duration';
 
   next();
 };
@@ -127,7 +128,7 @@ exports.getTourStats = async (req, res) => {
       },
     ]);
 
-    res.status(204).json({
+    res.status(200).json({
       status: 'success',
       data: { stats },
     });
@@ -157,30 +158,30 @@ exports.yearlyTourStats = async (req, res) => {
       },
       {
         $group: {
-          _id: { $month: 'startDates' },
+          _id: { $month: '$startDates' },
           numTours: { $sum: 1 },
           tours: { $push: '$name' },
         },
       },
       {
-        $addFields: { $month: '$_id' },
+        $addFields: { month: '$_id' },
       },
       {
         $project: { _id: 0 },
       },
       {
-        $sort: { $numTours: -1 },
+        $sort: { numTours: -1 },
       },
     ]);
 
-    res.status(204).json({
+    res.status(200).json({
       status: 'success',
-      tourNumber: plan.length,
+      tourNumber: plans.length,
       data: { plans },
     });
   } catch (err) {
     res.status(400).json({
-      status: fail,
+      status: 'fail',
       message: err,
     });
   }

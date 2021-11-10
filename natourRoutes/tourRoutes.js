@@ -12,7 +12,7 @@ router
   .get(tourController.aliasAllPremium, tourController.getAllTours);
 
 router.route('/tour-stats').get(tourController.getTourStats);
-router.route('/tour-year-stats').get(tourController.yearlyTourStats);
+router.route('/tour-year-stats/:year').get(tourController.yearlyTourStats);
 
 router
   .route('/')
