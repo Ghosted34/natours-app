@@ -1,32 +1,44 @@
-const mongoose = require('mongoose');
-const slugify = require('slugify');
+import mongoose from "mongoose";
+import slugify from "slugify";
+
+// Validators don't work on updates
 
 const tourSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Tour must have a name'],
+      required: [true, "Tour must have a name"],
       unique: true,
       trim: true,
+      maxlength: [40, "A tour nae must have equal or less than 40 charcaters"],
+      minlength: [10, "A tour nae must have equal or less than 10 charcaters"],
     },
     duration: {
       type: Number,
-      required: [true, 'Tour must have a duration'],
+      required: [true, "Tour must have a duration"],
     },
     maxGroupSize: {
       type: Number,
-      required: [true, 'Tour must have group size'],
+      required: [true, "Tour must have group size"],
     },
     price: {
       type: Number,
-      required: [true, 'Tour must have a price'],
+      required: [true, "Tour must have a price"],
     },
     priceDiscount: {
       type: Number,
+      validate: {
+        validator: function (value) {
+          return value < this.price ? true : false;
+        },
+        message: "Discount price ({VALUE}) should be less than regular price ",
+      },
     },
     ratingsAverage: {
       type: Number,
-      default: 4.5,
+      default: 3.5,
+      min: [1, "Rating must above 1.0"],
+      max: [5, "Rating must be below 5.0"],
     },
     ratingsQuantity: {
       type: Number,
@@ -34,7 +46,11 @@ const tourSchema = new mongoose.Schema(
     },
     difficulty: {
       type: String,
-      default: 'easy',
+      default: "easy",
+      enum: {
+        values: ["easy", "medium", "difficult"],
+        message: "Difficult must be easy,medium or difficult",
+      },
     },
     premium: {
       type: Boolean,
@@ -42,12 +58,16 @@ const tourSchema = new mongoose.Schema(
     },
     summary: {
       type: String,
-      required: [true, ' A tour must have a summary'],
+      required: [true, " A tour must have a summary"],
+      trim: true,
+    },
+    description: {
+      type: String,
       trim: true,
     },
     imageCover: {
       type: String,
-      required: [true, 'A tour must have a cover image'],
+      required: [true, "A tour must have a cover image"],
     },
     images: [String],
     createdAt: {
@@ -57,6 +77,10 @@ const tourSchema = new mongoose.Schema(
     },
     startDates: [Date],
     slug: String,
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -64,16 +88,25 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
-tourSchema.virtual('durationWeeks').get(function () {
+tourSchema.virtual("durationWeeks").get(function () {
   return (this.duration / 7).toPrecision(3);
 });
 
-// DOCUMENT MIDDLEWARE: runs before mongoode event[.save, .create,!.insertMany]
-tourSchema.pre('save', function (next) {
+// DOCUMENT MIDDLEWARE: runs before/after mongoose event[.save, .create,!.insertMany]
+tourSchema.pre("save", function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
 
-const Tour = mongoose.model('Tour', tourSchema);
+// QUERY MIDDLEWARE: runs before/after a query
+tourSchema.pre("find", function (next) {
+  this.find({ secretTour: { $ne: true } });
 
-module.exports = Tour;
+  next();
+});
+
+// AGGREGATION MIDDLEWARE: runs before/after aggregation operation
+
+const Tour = mongoose.model("Tour", tourSchema);
+
+export default Tour;

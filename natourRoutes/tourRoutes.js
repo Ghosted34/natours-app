@@ -1,28 +1,27 @@
-const express = require('express');
-const tourController = require('./../controllers/tourController');
+import { Router } from "express";
+import {
+  aliasTopTours,
+  getAllTours,
+  aliasAllPremium,
+  getTourStats,
+  yearlyTourStats,
+  createTour,
+  getTour,
+  updateTour,
+  deleteTour,
+} from "./../controllers/tourController.js";
 
-const router = express.Router();
+const router = Router();
 
-router
-  .route('/top-5-cheap')
-  .get(tourController.aliasTopTours, tourController.getAllTours);
+router.route("/top-5-cheap").get(aliasTopTours, getAllTours);
 
-router
-  .route('/all-premium')
-  .get(tourController.aliasAllPremium, tourController.getAllTours);
+router.route("/all-premium").get(aliasAllPremium, getAllTours);
 
-router.route('/tour-stats').get(tourController.getTourStats);
-router.route('/tour-year-stats/:year').get(tourController.yearlyTourStats);
+router.route("/tour-stats").get(getTourStats);
+router.route("/year-plan/:year").get(yearlyTourStats);
 
-router
-  .route('/')
-  .get(tourController.getAllTours)
-  .post(tourController.createTour);
+router.route("/").get(getAllTours).post(createTour);
 
-router
-  .route('/:id')
-  .get(tourController.getTour)
-  .patch(tourController.updateTour)
-  .delete(tourController.deleteTour);
+router.route("/:id").get(getTour).patch(updateTour).delete(deleteTour);
 
-module.exports = router;
+export default router;

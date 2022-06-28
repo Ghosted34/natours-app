@@ -2,9 +2,11 @@
   "name": "natours",
   "version": "1.0.0",
   "description": "Natours app",
+  "type": "module",
   "main": "app.js",
   "scripts": {
     "start": "nodemon server.js",
+    "prod": "NODE_ENV=production nodemon server.js",
     "debug": "ndb server.js"
   },
   "author": "Ghost",
