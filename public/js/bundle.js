@@ -11030,7 +11030,7 @@ function () {
             _context.next = 4;
             return (0, _axios.default)({
               method: "POST",
-              url: "http://127.0.0.1:3000/api/v1/users/".concat(urlType),
+              url: "/api/v1/users/".concat(urlType),
               data: data
             });
 
@@ -11082,7 +11082,7 @@ function () {
             _context2.next = 3;
             return (0, _axios.default)({
               method: "GET",
-              url: "http://127.0.0.1:3000/api/v1/users/logout"
+              url: "/api/v1/users/logout"
             });
 
           case 3:
@@ -11190,7 +11190,7 @@ function () {
             _context.next = 4;
             return (0, _axios.default)({
               method: "PATCH",
-              url: "http://127.0.0.1:3000/api/v1/users/update/".concat(urlType),
+              url: "/api/v1/users/update/".concat(urlType),
               data: data
             });
 
@@ -11265,7 +11265,7 @@ function () {
             _context.next = 4;
             return (0, _axios.default)({
               method: "GET",
-              url: "http://127.0.0.1:3000/api/v1/bookings/checkout-session/".concat(id)
+              url: "/api/v1/bookings/checkout-session/".concat(id)
             });
 
           case 4:
