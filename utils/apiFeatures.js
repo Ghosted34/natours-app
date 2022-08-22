@@ -21,12 +21,12 @@ class APIFeatures {
     return this;
   }
 
-  sort() {
+  sort(defSort) {
     if (this.queryString.sort) {
       const sortBy = this.queryString.sort.split(",").join(" ");
       this.query = this.query.sort(sortBy);
     } else {
-      this.query = this.query.sort("-price");
+      this.query = this.query.sort(defSort);
     }
 
     return this;

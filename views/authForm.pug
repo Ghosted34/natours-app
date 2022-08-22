@@ -1,0 +1,25 @@
+extends base
+
+block content 
+  .login-form
+    h2.heading-secondary.ma-bt-lg #{action}
+    form.form#auth-form(data-url=url)
+      .form__group
+        if url
+          label.form__label(for='name') Full Name
+          input#name.form__input(type='text', placeholder='Cedric Robot', required, name='name')
+        label.form__label(for='email') Email address
+        input#email.form__input(type='email', placeholder='you@example.com', required,name='email')
+      .form__group.ma-bt-md
+        label.form__label(for='password') Password
+        input#password.form__input(type='password', placeholder='••••••••', required, minlength='8',name='password')
+        if url
+          label.form__label(for='password') Confirm Password
+          input#passwordConfirm.form__input(type='password', placeholder='••••••••', required, minlength='8',name='passwordConfirm')
+      if url
+        .form__group.form__photo-upload
+          img.form__user-photo(src=`/img/users/default.jpg`, alt=`New user`)
+          input.form__upload(type="file", name="photo", id='photo', accept='image/*')
+          label(for='photo') Choose photo
+      .form__group
+        button(type='submit').btn.btn--green #{action}

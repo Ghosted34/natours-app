@@ -10,8 +10,8 @@ const tourSchema = new mongoose.Schema(
       required: [true, "Tour must have a name"],
       unique: true,
       trim: true,
-      maxlength: [40, "A tour nae must have equal or less than 40 charcaters"],
-      minlength: [10, "A tour nae must have equal or less than 10 charcaters"],
+      maxlength: [40, "A tour name must have equal or less than 40 charcaters"],
+      minlength: [10, "A tour name must have equal or less than 10 charcaters"],
     },
     duration: {
       type: Number,
@@ -36,9 +36,10 @@ const tourSchema = new mongoose.Schema(
     },
     ratingsAverage: {
       type: Number,
-      default: 3.5,
+      default: 3.7,
       min: [1, "Rating must above 1.0"],
       max: [5, "Rating must be below 5.0"],
+      set: (val) => val.toPrecision(1),
     },
     ratingsQuantity: {
       type: Number,
@@ -81,6 +82,30 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    startLocation: {
+      type: {
+        type: String,
+        default: "Point",
+        enum: ["Point"],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: "Point",
+          enum: ["Point"],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    guides: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
   },
   {
     toJSON: { virtuals: true },
@@ -88,8 +113,17 @@ const tourSchema = new mongoose.Schema(
   }
 );
 
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ startLocation: "2dsphere" });
+
 tourSchema.virtual("durationWeeks").get(function () {
   return (this.duration / 7).toPrecision(3);
+});
+
+tourSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "tour",
+  localField: "_id",
 });
 
 // DOCUMENT MIDDLEWARE: runs before/after mongoose event[.save, .create,!.insertMany]
@@ -99,9 +133,17 @@ tourSchema.pre("save", function (next) {
 });
 
 // QUERY MIDDLEWARE: runs before/after a query
-tourSchema.pre("find", function (next) {
-  this.find({ secretTour: { $ne: true } });
+// tourSchema.pre("find", function (next) {
+//   this.find({ secretTour: { $ne: true } });
 
+//   next();
+// });
+
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "guides",
+    select: "-__v -passwordChangedAt",
+  });
   next();
 });
 

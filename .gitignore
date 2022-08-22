@@ -5,3 +5,6 @@ scripts/
 
 # Enviromental variables
 .env
+
+# Parcel Cache
+.cache/

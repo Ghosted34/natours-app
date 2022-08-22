@@ -1,0 +1,26 @@
+extends baseEmail
+
+
+block content 
+
+  p Hi #{firstName},
+    p Heard you forgot your password. Sorry about that`;
+    p You can use the button below to set a new password
+    p {Website for this action not yet implemented}
+    table.btn.btn-primary(role='presentation', border='0', cellpadding='0', cellspacing='0')
+      tbody
+        tr
+          td(align='left')
+            table(role='presentation', border='0', cellpadding='0', cellspacing='0')
+              tbody
+                tr
+                  td
+                    a(href=`${url}`, target='_blank') Reset password
+    p If the button does not work, use the link below.
+    a(href=url, target="_blank", rel="noopener noreferrer") #{url}
+    br
+    p This action is valid for 10 minutes only
+    br
+    p if you did not make this action,please ignore this email.
+    br
+    p Please do not reply this mail with your password. We will never ask you for your password
