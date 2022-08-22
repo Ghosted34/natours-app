@@ -3,18 +3,18 @@ import "dotenv/config";
 
 import app from "./app.js";
 
-// const DB = process.env.DATABASE.replace(
-//   "<password>",
-//   process.env.DATABASE_PASSWORD
-// );
+const DB = process.env.DATABASE.replace(
+  "<password>",
+  process.env.DATABASE_PASSWORD
+);
 
 process.on("uncaughtException", (err) => {
   console.log(err.name, err.message);
-  console.log("Unhandled Rejection! Shutting down");
+  console.log("Uncaught Exception! Shutting down");
   process.exit(1);
 });
 
-const DB = process.env.DATABASE_LOCAL;
+// const DB = process.env.DATABASE_LOCAL;
 
 mongoose
   .connect(DB, {

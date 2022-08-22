@@ -5,7 +5,7 @@ import Review from "../../models/reviewModel.js";
 import * as fs from "fs";
 
 const DB =
-  "mongodb+srv://ghosted34:<password>@memoriescluster.p6ru1us.mongodb.net/?retryWrites=true&w=majority";
+  "mongodb+srv://ghosted34:<password>@natours.8n8kzjk.mongodb.net/?retryWrites=true&w=majority";
 
 const DATABASE = DB.replace("<password>", "root123");
 mongoose
