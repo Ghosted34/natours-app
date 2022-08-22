@@ -3,11 +3,7 @@ import "dotenv/config";
 
 import app from "./app.js";
 
-const DB = process.env.DATABASE.replace(
-  "<password>",
-  process.env.DATABASE_PASSWORD
-);
-
+const DB = process.env.DATABASE;
 process.on("uncaughtException", (err) => {
   console.log(err.name, err.message);
   console.log("Uncaught Exception! Shutting down");
