@@ -86,9 +86,9 @@ export const globalErrorHandler = (err, req, res, next) => {
     if (error.kind === "ObjectId") error = handleObjectIdErrorDB(error);
     if (error.code === 11000) error = handleDuplicateFieldsDB(error);
     if (
-      error.message === "Validation failed" ||
-      error.message === "User validation failed" ||
-      error.message === "Tour Validation Failed"
+      error._message === "Validation failed" ||
+      error._message === "User validation failed" ||
+      error._message === "Tour Validation Failed"
     )
       error = handleValidationErrorDB(error);
     if (error.name === "JsonWebTokenError") error = handleJWTError();
